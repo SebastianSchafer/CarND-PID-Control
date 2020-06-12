@@ -1,8 +1,33 @@
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
-
+See original Udacity documentation at the bottom of this readme
 ---
 
+## Overview
+This projects implements a basic PID controller to steer a [simulated](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) vehicle around a track.
+
+The simulator provides the current vehicle speed and cross-track error (cte), i.e. the (signed) distance from the centerline. The PID controller returns a steering angle to minimize the cte. The speed could also be controlled using the same PID class with a different set of parameters; this implementation ignores the speed for the PID controller however and simply sets a fixed speed. This is [easily](https://github.com/SebastianSchafer/CarND-PID-Control/blob/4496f503f5ce7f496597a1880842f5ec35308da9/src/main.cpp#L138-L142) achieved here due to instantaneous throttle response and the vehicle inertia.
+
+### Impact of PID parameters
+Before finding a proper set of parameter values, it's helpful to understand the impact each component of the controller has on the feedback:
+* The proportional (P) component feedback is proportional to the cte, i.e. it will point the vehicle back the the center of the lane. Without any other terms, this will lead to an oscillating behavior though.
+* The integral (I) component is a sum of cte over time, i.e. it won't correct an offset from the center very quickly, but is helpful in eliminating biasing not properly caught in the model underlying the feedback. In this particular case it helps the vehicle to minimize cte expecially along curves, where P&D components would lead to understeer as the vehicle is not aware of the curve in the road, just the cte.
+* The differential (D) component has a damping effect - it is proportional to the change in cte, i.e. will reduce overshooting the centerline caused by the P component if properly calibrated.
+
+### Finding and optimizing parameters
+The initial parameters were setup manuall by trial and error for a rather low speed of 20mph. The feedback is easier to control for lower speeds, partially because it gives the simulator (whcih works at a fixed frame rate) more time to center the vehicles before running off the track. It is helpful for an initial set of parameters to set the integral part to 0, leaving only 2 parameters for the initial tuning.
+
+After the initial manual setup, I used the [twiddle](https://github.com/SebastianSchafer/CarND-PID-Control/blob/4496f503f5ce7f496597a1880842f5ec35308da9/src/PID.cpp#L67-L117) method of the PID class to explore the parameter space and find optimal parameters. To that end, I reset the simulator after a given number of steps, followed by an iteration of the twiddle algorithm which then sets the parameters for the next run. One has to be conservative with the parameter range to be explored, as the simulator does in some cases not respond properly even after the reset if the vehicle ran off the track.
+
+After tuning the parameters for a speed of 20mph, I used these as a starting point to tune at increasingly higher speeds, up to 60mph. <img align="right" width="320"  src="data/par_vs_v.png">
+As expected, the optimal value for the P component decreases for larger speeds - it only takes a small change in steering angle for the required feedback in a given time. The decrease in P is ~24x going 3x in speed from 20mph to 60mph. The integral component increases by a similar amount (30x), while the differential feedback also decreases - however only ~5x.
+
+Ideally, one would tune the parameters for a larger number of speeds to obtain enough data for a good enough fit - one then can simply call the PID with both the cte and speed information and adapt the feedback to the speed of the vehicle.
+
+While the vehicle was able to consistently drive around the track at up to [60mph](data/60mph.mp4), it is at times oscillating significantly. The parameters for [40mph](data/40mph.mp4) yield a better controlled behavior.
+
+
+# Original Udacity documentation
 ## Dependencies
 
 * cmake >= 3.5
