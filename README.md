@@ -1,7 +1,7 @@
 # CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
-See original Udacity documentation at the bottom of this readme
----
+
+Self-Driving Car Engineer Nanodegree Program, see bottom of this readme for original Udacity documentation.
+
 
 ## Overview
 This projects implements a basic PID controller to steer a [simulated](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) vehicle around a track.
