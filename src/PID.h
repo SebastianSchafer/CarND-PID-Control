@@ -1,6 +1,9 @@
 #ifndef PID_H
 #define PID_H
 
+#include <vector>
+#include <fstream>
+
 class PID {
  public:
   /**
@@ -30,6 +33,30 @@ class PID {
    * @output The total PID error
    */
   double TotalError();
+  double SteeringAngle(double max_steer);
+  void log_tune(std::ofstream &logfile, double &cte, double &speed, int &step);
+  void log_summary(std::ofstream &summary);
+  int tune_iter;
+  bool tune;
+  double tune_tolerance;
+  double cum_err;
+  double best_err;
+  int twiddle_iter_p;
+  bool twiddle_set_large_up;
+  bool twiddle_set_large_down;
+  bool twiddle_check_large_up;
+  bool twiddle_check_large_down;
+  std::vector<double> twiddle_p;
+  std::vector<double> twiddle_dp;
+  void twiddle(std::ofstream &summary);
+  double target_speed;
+  
+  /**
+   * PID Coefficients
+   */ 
+  double Kp;
+  double Ki;
+  double Kd;
 
  private:
   /**
@@ -39,12 +66,6 @@ class PID {
   double i_error;
   double d_error;
 
-  /**
-   * PID Coefficients
-   */ 
-  double Kp;
-  double Ki;
-  double Kd;
 };
 
 #endif  // PID_H
